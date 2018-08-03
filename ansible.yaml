@@ -1,0 +1,33 @@
+---
+- hosts: ecs_cluster
+  remote_user: ec2-user
+  vars_files:
+    - secrets.yml
+  tasks:
+  - name: Add Gremlin YUM Repository
+    yum_repository:
+      name: Gremlin
+      description: Gremlin REPO
+      baseurl: https://rpm.gremlin.com/noarch/
+      enabled: 1
+      gpgkey: https://rpm.gremlin.com/gremlin-pgp-public.key
+      gpgcheck: 1
+
+  - name: Install Gremlin
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - gremlin
+      - gremlind
+
+  - name: Run Gremlin
+    shell: |
+      export INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+      export INSTANCE_TYPE=$(curl http://169.254.169.254/latest/meta-data/instance-type)
+      export GREMLIN_IDENTIFIER=$INSTANCE_ID
+
+      gremlin init --tag instance_type=$INSTANCE_TYPE --tag instance_id=$INSTANCE_ID
+    environment:
+      GREMLIN_TEAM_ID: "{{ gremlin_team_id }}"
+      GREMLIN_TEAM_SECRET: "{{ gremlin_team_secret }}"
