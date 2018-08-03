@@ -6,10 +6,11 @@ ansible-vault create secrets.yml
 
 In the following format:
 
+```yaml
 ---
 gremlin_team_id: <team_id>
 gremlin_team_secret: <team_secret>
-
+```
 
 
 
